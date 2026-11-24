@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "locatorbarfix",
+  "version": "1.0.0",
+  "name": "Locator Bar Fix",
+  "description": "Client-side fallback for missing vanilla locator waypoint markers. Does not replace the HUD.",
+  "environment": "client",
+  "license": "MIT",
+  "mixins": [
+    "locatorbarfix.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "1.21.11",
+    "java": ">=21"
+  }
+}

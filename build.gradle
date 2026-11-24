@@ -1,0 +1,15 @@
+plugins {
+    id 'net.fabricmc.fabric-loom-remap' version '1.14.10'
+    id 'java'
+}
+group = 'dev.locatorfix'
+version = '1.0.0'
+base { archivesName = 'locatorbarfix-1.21.11' }
+repositories { mavenCentral() }
+dependencies {
+    minecraft 'com.mojang:minecraft:1.21.11'
+    mappings 'net.fabricmc:yarn:1.21.11+build.6:v2'
+    modImplementation 'net.fabricmc:fabric-loader:0.18.1'
+}
+java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
+tasks.withType(JavaCompile).configureEach { options.release = 21 }
