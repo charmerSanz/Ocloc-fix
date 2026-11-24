@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+permissions:
+  contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,5 +22,42 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: locatorbarfix-1.21.11
-          path: build/libs/*.jar
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+            !build/libs/*-dev.jar
           if-no-files-found: error
+  release:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: publish-release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: locatorbarfix-1.21.11
+          path: release
+      - name: Publish compiled mod
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(jq -er '.version' src/main/resources/fabric.mod.json)
+          tag="v$version"
+          shopt -s nullglob
+          jars=(release/*.jar)
+          if [ "${#jars[@]}" -ne 1 ]; then
+            echo "Expected exactly one remapped mod JAR, found ${#jars[@]}"
+            exit 1
+          fi
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists. Increment the mod version for a new release."
+            exit 0
+          fi
+          gh release create "$tag" "${jars[0]}" --target "$GITHUB_SHA" --title "Locator Bar Fix $tag" --notes "Fabric mod for Minecraft 1.21.11 (Java 21). Download the JAR and place it in your client mods folder. In-game compatibility has not yet been verified."
